@@ -1,0 +1,16 @@
+Metric,Value
+Total Forecast Demand,210898.0
+Total Actual Demand,210161.0
+Total Shortage Units,38134.0
+Total Purchase Quantity,38134.0
+Total Purchase Cost,836298974.13
+Total Surplus Units,40043.0
+Number of Shortage Records,3463.0
+Affected Branches,8.0
+Affected Products,10.0
+Service Level,0.8192
+Average Shortage per Affected Record,11.01
+Maximum Shortage,84.0
+Forecast MAE,1.8679
+Forecast RMSE,2.7436
+Forecast MAPE (%),6.3258

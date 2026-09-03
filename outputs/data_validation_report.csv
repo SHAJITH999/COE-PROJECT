@@ -1,0 +1,4 @@
+dataset,num_rows,num_columns,num_branches,num_products,date_range,missing_values,duplicate_rows,invalid_records,data_quality_status
+inventory_demand,7200,16,8,10,2026-07-01 to 2026-09-28,0,0,0,PASS
+transfer_routes,56,9,8,0,N/A,0,0,0,PASS
+recommendations_sample,52,15,8,10,2026-09-28 to 2026-09-28,67,0,0,PASS
