@@ -100,7 +100,7 @@ def test_edge_case_2_surplus_smaller_than_shortage(base_routes):
     recs, metrics = generate_recommendations(inv_df, base_routes)
     
     assert len(recs) == 2
-    transfer_rec = recs[recs["Recommendation_Type"] == "TRANSFER"].iloc[0]
+    transfer_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER"].iloc[0]
     purchase_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER_AND_PURCHASE"].iloc[0]
     
     assert transfer_rec["Recommended_Quantity"] == 18.0
@@ -135,7 +135,7 @@ def test_edge_case_3_donor_safety_stock_protection(base_routes):
     assert avail_surplus == 15.0  # Exactly 15 units above safety floor
     
     recs, _ = generate_recommendations(inv_df, base_routes)
-    transfer_rec = recs[recs["Recommendation_Type"] == "TRANSFER"].iloc[0]
+    transfer_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER"].iloc[0]
     assert transfer_rec["Recommended_Quantity"] == 15.0
     assert "safety stock protected" in transfer_rec["Evidence"].lower()
 
@@ -204,7 +204,7 @@ def test_edge_case_5_vehicle_capacity_smaller_than_shortage():
     recs, _ = generate_recommendations(inv_df, small_capacity_routes)
     
     assert len(recs) == 2
-    transfer_rec = recs[recs["Recommendation_Type"] == "TRANSFER"].iloc[0]
+    transfer_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER"].iloc[0]
     purchase_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER_AND_PURCHASE"].iloc[0]
     
     # Capped at Vehicle_Capacity = 25

@@ -166,8 +166,8 @@ elif page == "Recommendations":
         "Filter by Urgency", ["Critical", "High", "Medium", "Low"], default=["Critical", "High", "Medium", "Low"]
     )
     type_filter = filter_col2.multiselect(
-        "Filter by Type", ["TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE", "PURCHASE"],
-        default=["TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE", "PURCHASE"]
+        "Filter by Type", ["TRANSFER", "PARTIAL_TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE", "PURCHASE"],
+        default=["TRANSFER", "PARTIAL_TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE", "PURCHASE"]
     )
 
     filtered_df = recs_df[

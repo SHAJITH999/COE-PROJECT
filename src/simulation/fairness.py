@@ -41,7 +41,7 @@ def calculate_fairness_metrics(recs_df: pd.DataFrame, inventory_df: pd.DataFrame
     
     if not recs_df.empty:
         transfers = recs_df[
-            (recs_df["Recommendation_Type"].isin(["TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE"])) &
+            (recs_df["Recommendation_Type"].isin(["TRANSFER", "PARTIAL_TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE"])) &
             (recs_df["Shortage_Avoided"] > 0) &
             (recs_df["Source_Branch"] != "")
         ]

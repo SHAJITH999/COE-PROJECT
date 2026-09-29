@@ -110,16 +110,51 @@ def test_partial_transfer_and_purchase_fallback(sample_routes):
     
     recs, metrics = generate_recommendations(inv_df, sample_routes)
     
-    # Expect 1 TRANSFER (15 units) and 1 PURCHASE (25 units)
+    # Expect 1 PARTIAL_TRANSFER (15 units) and 1 PARTIAL_TRANSFER_AND_PURCHASE (25 units)
     assert len(recs) == 2
     
-    transfer_rec = recs[recs["Recommendation_Type"] == "TRANSFER"].iloc[0]
+    transfer_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER"].iloc[0]
     assert transfer_rec["Recommended_Quantity"] == 15.0
     assert transfer_rec["Remaining_Shortage"] == 25.0
+    assert "Partial transfer leg" in transfer_rec["Evidence"]
     
     purchase_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER_AND_PURCHASE"].iloc[0]
     assert purchase_rec["Purchase_Quantity"] == 25.0
     assert purchase_rec["Recommended_Quantity"] == 25.0
+    assert "remaining shortage of 25 units requires purchase" in purchase_rec["Evidence"]
+
+
+def test_partial_transfer_multi_leg_no_purchase(sample_routes):
+    """Test multi-donor partial transfers that satisfy the entire shortage without purchase."""
+    inv_df = pd.DataFrame([
+        # Recipient shortage = 35
+        {
+            "Date": "2026-07-01", "Branch_ID": "B002", "Product_ID": "P001",
+            "Shortage_Units": 35.0, "Surplus_Units": 0.0, "Service_Urgency": "High",
+            "Purchase_Cost": 100.0
+        },
+        # Donor 1: B001 has 20 units surplus
+        {
+            "Date": "2026-07-01", "Branch_ID": "B001", "Product_ID": "P001",
+            "Shortage_Units": 0.0, "Surplus_Units": 20.0, "Service_Urgency": "Low",
+            "Purchase_Cost": 100.0
+        },
+        # Donor 2: B003 has 20 units surplus
+        {
+            "Date": "2026-07-01", "Branch_ID": "B003", "Product_ID": "P001",
+            "Shortage_Units": 0.0, "Surplus_Units": 20.0, "Service_Urgency": "Low",
+            "Purchase_Cost": 100.0
+        }
+    ])
+    
+    recs, metrics = generate_recommendations(inv_df, sample_routes)
+    
+    # 2 transfer legs: 20 units from B001, 15 units from B003; total = 35 -> zero purchase
+    assert len(recs) == 2
+    assert (recs["Recommendation_Type"] == "PARTIAL_TRANSFER").all()
+    assert recs["Shortage_Avoided"].sum() == 35.0
+    assert recs["Remaining_Shortage"].iloc[-1] == 0.0
+    assert recs["Purchase_Quantity"].sum() == 0.0
 
 
 def test_no_donor_available(sample_routes):
@@ -165,7 +200,7 @@ def test_donor_cannot_violate_safety_stock(sample_routes):
     assert avail == 10.0
     
     recs, metrics = generate_recommendations(inv_df, sample_routes)
-    t_rec = recs[recs["Recommendation_Type"] == "TRANSFER"].iloc[0]
+    t_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER"].iloc[0]
     assert t_rec["Recommended_Quantity"] == 10.0  # Cannot transfer more than 10.0
 
 
@@ -188,7 +223,7 @@ def test_transfer_cannot_exceed_capacity(sample_routes):
     ])
     
     recs, metrics = generate_recommendations(inv_df, sample_routes)
-    t_rec = recs[recs["Recommendation_Type"] == "TRANSFER"].iloc[0]
+    t_rec = recs[recs["Recommendation_Type"] == "PARTIAL_TRANSFER"].iloc[0]
     # Capped at Vehicle_Capacity = 50
     assert t_rec["Recommended_Quantity"] == 50.0
 

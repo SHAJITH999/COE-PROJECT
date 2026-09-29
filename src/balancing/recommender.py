@@ -68,16 +68,16 @@ def generate_recommendations(
             if transfer_qty <= 0:
                 continue
                 
-            # Inter-branch transfer leg recommendation.
-            # All successful transfer allocations are recorded as 'TRANSFER'.
-            # If remaining shortage cannot be fulfilled by transfers, subsequent leg is recorded as 'PARTIAL_TRANSFER_AND_PURCHASE'.
-            rec_type = "TRANSFER"
-            
-            coverage_desc = (
-                f"Full shortage satisfied ({int(transfer_qty)} units)"
-                if transfer_qty == shortage_before
-                else f"Partial transfer leg covering {int(transfer_qty)} of {int(shortage_before)} shortage units"
-            )
+            # Inter-branch transfer leg recommendation:
+            # - If transfer quantity completely satisfies the initial shortage: 'TRANSFER'
+            # - If transfer quantity only satisfies part of the shortage: 'PARTIAL_TRANSFER'
+            # - If remaining shortage cannot be fulfilled by transfers, subsequent leg is recorded as 'PARTIAL_TRANSFER_AND_PURCHASE'.
+            if transfer_qty >= shortage_before:
+                rec_type = "TRANSFER"
+                coverage_desc = f"Full shortage satisfied ({int(transfer_qty)} units)"
+            else:
+                rec_type = "PARTIAL_TRANSFER"
+                coverage_desc = f"Partial transfer leg covering {int(transfer_qty)} of {int(shortage_before)} shortage units"
             
             evidence = (
                 f"{coverage_desc}; Source {source_branch} has {int(avail_surplus)} usable surplus units; "
@@ -148,7 +148,7 @@ def generate_recommendations(
     total_shortage_before = float(shortage_records["Shortage_Units"].sum()) if not shortage_records.empty else 0.0
     
     if not recs_df.empty:
-        transfer_recs = recs_df[recs_df["Recommendation_Type"].isin(["TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE"]) & (recs_df["Shortage_Avoided"] > 0)]
+        transfer_recs = recs_df[recs_df["Recommendation_Type"].isin(["TRANSFER", "PARTIAL_TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE"]) & (recs_df["Shortage_Avoided"] > 0)]
         purchase_recs = recs_df[recs_df["Purchase_Quantity"] > 0]
         
         total_shortage_avoided = float(recs_df["Shortage_Avoided"].sum())

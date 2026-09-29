@@ -48,7 +48,7 @@ def calculate_safety_metrics(recs_df: pd.DataFrame) -> pd.DataFrame:
         total_recs = 0
         safety_violations = 0
     else:
-        transfer_recs = recs_df[recs_df["Recommendation_Type"].isin(["TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE"]) & (recs_df["Shortage_Avoided"] > 0)]
+        transfer_recs = recs_df[recs_df["Recommendation_Type"].isin(["TRANSFER", "PARTIAL_TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE"]) & (recs_df["Shortage_Avoided"] > 0)]
         total_recs = len(transfer_recs)
         
         # Check evidence strings for safety violation flags

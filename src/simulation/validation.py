@@ -181,7 +181,7 @@ def generate_stakeholder_validation(recs_df: pd.DataFrame) -> Tuple[pd.DataFrame
         evidence = str(row.get("Evidence", ""))
         
         # Prototype review logic
-        if rec_type == "TRANSFER":
+        if rec_type in ["TRANSFER", "PARTIAL_TRANSFER"]:
             decision = "ACCEPTED"
             reason = "Transfer mathematically optimal, protects safety stock, and saves purchase cost"
             accepted_count += 1

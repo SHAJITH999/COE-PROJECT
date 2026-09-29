@@ -1,12 +1,21 @@
 # Multi-Location Inventory Balancing Recommender
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/pytest-67%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/pytest-68%20passed-brightgreen.svg)]()
 [![Safety Invariant](https://img.shields.io/badge/safety%20violations-0-brightgreen.svg)]()
 [![Shortage Avoidance](https://img.shields.io/badge/shortage%20avoided-67.13%25-blue.svg)]()
 [![Modeled Savings](https://img.shields.io/badge/cost%20savings-INR%20566M+-success.svg)]()
 
 A multi-location inventory balancing recommender system designed for multi-branch distributor networks. It identifies regional stock shortages and transferable surpluses, prioritizing internal inter-branch transfers before placing expensive external purchase orders with suppliers.
+
+---
+
+### Quick Start (One-Command Reproducibility)
+Run the entire project pipeline end-to-end (Stages 1 through 7, including the test suite):
+```bash
+python run_all.py
+```
+This single command executes data preparation, demand forecasting, stock balancing recommendations, 4-scenario disruption stress simulation, baseline evaluation, error/edge-case validation, and the complete 68-test suite.
 
 ---
 
@@ -182,12 +191,12 @@ COE PROJECT/
 │       ├── safety.py
 │       ├── scenarios.py
 │       └── validation.py
-└── tests/                          # 67 Automated unit and regression tests
+└── tests/                          # 68 Automated unit and regression tests
     ├── test_api.py                 # API endpoints & approval governance (24 tests)
     ├── test_baseline.py            # Baseline purchase model & metrics (9 tests)
     ├── test_edge_cases.py          # 6 Mandatory operational edge cases (6 tests)
     ├── test_inventory.py           # Inventory position & shortages (8 tests)
-    ├── test_recommender.py         # Allocation & constraint rules (10 tests)
+    ├── test_recommender.py         # Allocation & constraint rules (11 tests)
     ├── test_simulation.py          # Disruption scenarios & fairness (5 tests)
     └── test_validation.py          # Validation pipeline checks (5 tests)
 ```
@@ -343,16 +352,24 @@ The recommender is hardened against 6 mandatory operational failure modes (verif
 ---
 
 ## 19. Testing & Verification
-The test suite consists of **67 automated tests** spanning all system modules:
+
+### Test Status
+Pytest: 68 passed 0 failed  
+Command: `python -m pytest tests/ -q`
+
+The test suite consists of **68 automated tests** spanning all system modules:
 
 ```bash
-$ pytest
-============================== 67 passed, 1 warning in 14.25s ==============================
+$ python -m pytest tests/ -q
+....................................................................     [100%]
+============================== warnings summary ===============================
+..\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+68 passed, 1 warning in 13.40s
 ```
 
 ### Test Breakdown by Module
 - `tests/test_api.py`: **24 passed** (FastAPI endpoints, HTTP codes, approval/rejection/override workflows, audit persistence)
-- `tests/test_recommender.py`: **10 passed** (Full/partial transfer logic, capacity constraints, safety constraints)
+- `tests/test_recommender.py`: **11 passed** (Full transfer, partial transfer multi-leg, partial transfer with purchase, capacity constraints, safety constraints)
 - `tests/test_baseline.py`: **9 passed** (Purchase-only baseline calculations, service level, forecast metrics)
 - `tests/test_inventory.py`: **8 passed** (Inventory positions, scalar/series shortage and surplus calculations)
 - `tests/test_edge_cases.py`: **6 passed** (Explicit edge case tests: Cases 1 through 6)
@@ -407,19 +424,17 @@ python run_all.py
 ============================================================
 Working Directory: C:\COE PROJECT
 
-[1/6] Data preparation ...................... PASS (0.26s)
-[2/6] Forecasting & Intelligence ............ PASS (0.31s)
-[3/6] Recommender ........................... PASS (0.85s)
-[4/6] Simulation ............................ PASS (3.48s)
-[5/6] Evaluation & Metrics .................. PASS (0.10s)
-[6/6] Validation ............................ PASS (0.12s)
+[1/7] Data preparation ...................... PASS (0.16s)
+[2/7] Forecasting & Intelligence ............ PASS (0.26s)
+[3/7] Recommender ........................... PASS (0.81s)
+[4/7] Simulation ............................ PASS (3.13s)
+[5/7] Evaluation & Metrics .................. PASS (0.07s)
+[6/7] Validation ............................ PASS (0.06s)
+[7/7] Test suite ............................ PASS (13.85s)
 
-Running test suite...
-67 passed, 1 warning in 14.25s
-
-All tests passed in 15.61s.
+All tests passed in 13.85s.
 ============================================================
-PIPELINE COMPLETED SUCCESSFULLY in 20.74s
+PIPELINE COMPLETED SUCCESSFULLY in 18.35s
 ============================================================
 ```
 

@@ -39,7 +39,7 @@ def stage_status(stage_num: int, total_stages: int, name: str, status: str, dura
 
 def run_pipeline_end_to_end() -> bool:
     print_header()
-    total_stages = 6
+    total_stages = 7
     start_all = time.time()
     
     # Ensure required directories exist
@@ -143,9 +143,11 @@ def run_pipeline_end_to_end() -> bool:
             print("\n".join(err_lines))
             
     if test_proc.returncode != 0:
+        stage_status(7, total_stages, "Test suite", "FAIL", test_time)
         print("\nTEST SUITE FAILED!")
         return False
         
+    stage_status(7, total_stages, "Test suite", "PASS", test_time)
     print(f"\nAll tests passed in {test_time:.2f}s.")
     total_time = time.time() - start_all
     print("=" * 60)

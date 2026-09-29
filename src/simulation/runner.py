@@ -43,7 +43,7 @@ def run_single_scenario_experiment(
     recs_df, rec_metrics_df = generate_recommendations(inv_df, routes_df)
     
     if not recs_df.empty:
-        transfer_recs = recs_df[recs_df["Recommendation_Type"].isin(["TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE"]) & (recs_df["Shortage_Avoided"] > 0)]
+        transfer_recs = recs_df[recs_df["Recommendation_Type"].isin(["TRANSFER", "PARTIAL_TRANSFER", "PARTIAL_TRANSFER_AND_PURCHASE"]) & (recs_df["Shortage_Avoided"] > 0)]
         purchase_recs = recs_df[recs_df["Purchase_Quantity"] > 0]
         
         shortage_avoided = float(recs_df["Shortage_Avoided"].sum())
