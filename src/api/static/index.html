@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Multi-Branch Distributor Inventory Balancing Platform - Automated Inter-Branch Stock Transfers to Solve Shortages with Regional Surplus">
+  <title>DistriBalance Pro | Multi-Branch Inventory Balancing Recommender</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <!-- Chart.js for Stock Movement and Category Distribution Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ==================== SIDEBAR (STEP 3) ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">DistriBalance Pro</div>
+        <div class="brand-subtitle">Multi-Branch Rebalancer</div>
+      </div>
+    </div>
+
+    <!-- Active Network Focus -->
+    <div class="sidebar-selector-wrapper">
+      <label class="sidebar-section-label" for="sidebarRegionSelect">Active Network Focus</label>
+      <select class="form-select" id="sidebarRegionSelect">
+        <option value="ALL">🌐 All Regional Branches (8)</option>
+        <option value="B001">📍 Chennai Hub (B001)</option>
+        <option value="B002">📍 Coimbatore Hub (B002)</option>
+        <option value="B003">📍 Madurai Hub (B003)</option>
+        <option value="B004">📍 Salem Hub (B004)</option>
+        <option value="B005">📍 Trichy Hub (B005)</option>
+        <option value="B006">📍 Tiruppur Hub (B006)</option>
+        <option value="B007">📍 Erode Hub (B007)</option>
+        <option value="B008">📍 Vellore Hub (B008)</option>
+      </select>
+    </div>
+
+    <!-- Main Navigation Items -->
+    <div class="sidebar-section-label" style="padding: 12px 18px 4px;">Main Navigation</div>
+    <ul class="nav-menu">
+      <li class="nav-item active" data-view="dashboard">
+        <a href="#dashboard" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+            <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+            <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item" data-view="recommendations">
+        <a href="#recommendations" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span>Recommendations</span>
+        </a>
+      </li>
+      <li class="nav-item" data-view="branches">
+        <a href="#branches" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V7l8-4v18"></path>
+            <path d="M19 21V11l-6-4"></path>
+            <path d="M9 9v.01"></path>
+            <path d="M9 12v.01"></path>
+            <path d="M9 15v.01"></path>
+            <path d="M9 18v.01"></path>
+          </svg>
+          <span>Branches</span>
+        </a>
+      </li>
+      <li class="nav-item" data-view="transfers">
+        <a href="#transfers" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+          <span>Transfers & Audit</span>
+        </a>
+      </li>
+      <li class="nav-item" data-view="stock-overview">
+        <a href="#stock-overview" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Stock Overview</span>
+        </a>
+      </li>
+      <li class="nav-item" data-view="reports">
+        <a href="#reports" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span>Audit & Reports</span>
+        </a>
+      </li>
+      <li class="nav-item" data-view="settings">
+        <a href="#settings" class="nav-link">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>System Settings</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- System Status & Version Footer -->
+    <div class="sidebar-footer">
+      <div class="system-status-pill" id="systemStatusIndicator">
+        <span class="status-dot"></span>
+        <span>System Online</span>
+      </div>
+      <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px;">
+        FastAPI v0.100+ • SQLite Audit Engine
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
+  <div class="main-wrapper">
+    
+    <!-- TOP HEADER (STEP 4) -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="mobile-toggle-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="header-titles">
+          <h1 class="header-title">Multi-Branch Distributor Stock Balancing</h1>
+          <div class="header-subtitle">Moving Stock Between Locations to Solve Shortages with Regional Surplus</div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Global Search Bar (STEP 9) -->
+        <div class="search-box-wrapper">
+          <svg class="search-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            class="search-box-input" 
+            id="globalSearchInput" 
+            placeholder="Search branch, product, SKU, transfer..." 
+            autocomplete="off"
+          />
+          <div class="search-dropdown" id="searchResultsDropdown"></div>
+        </div>
+
+        <!-- Scenario Mode Filter -->
+        <select class="header-scenario-select" id="headerScenarioSelect" title="Operational Stress Scenario">
+          <option value="NORMAL">Scenario: Normal Baseline</option>
+          <option value="SPIKE">Scenario: Demand Spike (+50%)</option>
+          <option value="DELAY">Scenario: Transit Delay (2x)</option>
+        </select>
+
+        <!-- Current Operating Date -->
+        <div class="header-date-pill" id="headerCurrentDate">
+          26 Sep 2026 | Day 90
+        </div>
+
+        <!-- Refresh Button -->
+        <button class="header-action-icon-btn" id="headerRefreshBtn" title="Refresh Live Data from Backend">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
+
+        <!-- Notifications Bell Button -->
+        <button class="header-action-icon-btn" id="headerAlertsBtn" title="Operational Alerts">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notification-badge" id="alertsBadgeCount">0</span>
+        </button>
+
+        <!-- Operator Profile -->
+        <div class="user-profile-btn" title="Regional Inventory Controller">
+          <div class="user-avatar">SC</div>
+          <div>
+            <div class="user-name">Supply Controller</div>
+            <div class="user-role">Logistics Operator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- WORKSPACE VIEW PANELS -->
+    <main class="dashboard-workspace">
+
+      <!-- ==================== VIEW 1: DASHBOARD (MAIN) ==================== -->
+      <section class="view-panel active" id="view-dashboard">
+
+        <!-- PAGE TITLE / ACTION BAR (STEP 5) -->
+        <div class="page-title-bar">
+          <div>
+            <span class="page-title-badge">Stock Balancing Operations</span>
+            <h2 class="page-main-heading">Multi-Branch Stock Rebalancer</h2>
+            <p class="page-main-description">
+              Move stock between locations to solve shortages using available regional surplus across regional distribution hubs.
+            </p>
+          </div>
+          <div class="page-action-group">
+            <button class="btn btn-primary" onclick="openCreateTransferModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Create Transfer
+            </button>
+            <button class="btn btn-secondary" onclick="fetchRecommendationsData().then(renderRecommendationsFeed)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              Re-Analyze
+            </button>
+          </div>
+        </div>
+
+        <!-- ROW 1: 4 MAIN KPI CARDS (STEP 6) -->
+        <div class="kpi-grid">
+          <!-- 1. Total Network Stock -->
+          <div class="kpi-card blue">
+            <div class="kpi-top">
+              <div>
+                <div class="kpi-label">Total Network Stock</div>
+                <div class="kpi-value" id="kpiTotalStock">Loading...</div>
+              </div>
+              <div class="kpi-icon-pill blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-subtext">Across 8 regional warehouse hubs</div>
+          </div>
+
+          <!-- 2. Pending Transfers -->
+          <div class="kpi-card green">
+            <div class="kpi-top">
+              <div>
+                <div class="kpi-label">Pending Transfers</div>
+                <div class="kpi-value" id="kpiPendingTransfers">0</div>
+              </div>
+              <div class="kpi-icon-pill green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="1" y="3" width="15" height="13"></rect>
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                  <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                  <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-subtext">Active internal network rebalancing</div>
+          </div>
+
+          <!-- 3. Active Branches -->
+          <div class="kpi-card purple">
+            <div class="kpi-top">
+              <div>
+                <div class="kpi-label">Active Branches</div>
+                <div class="kpi-value" id="kpiActiveBranches">8</div>
+              </div>
+              <div class="kpi-icon-pill purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18"></path>
+                  <path d="M5 21V7l8-4v18"></path>
+                  <path d="M19 21V11l-6-4"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-subtext">100% interconnected distribution nodes</div>
+          </div>
+
+          <!-- 4. Stock Shortage Alerts -->
+          <div class="kpi-card red">
+            <div class="kpi-top">
+              <div>
+                <div class="kpi-label">Stock Shortage Alerts</div>
+                <div class="kpi-value" id="kpiShortageAlerts">0</div>
+              </div>
+              <div class="kpi-icon-pill red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-subtext">SKUs below demand + safety floor</div>
+          </div>
+        </div>
+
+        <!-- Hidden hooks for secondary metrics used by JS -->
+        <span id="kpiCostSavings" style="display:none;"></span>
+        <span id="kpiShortageAvoidance" style="display:none;"></span>
+
+        <!-- ROW 2: STOCK MOVEMENT CHART & BRANCH STOCK STATUS (STEP 10) -->
+        <div class="row-movement-branch-grid">
+          
+          <!-- Stock Movement Chart -->
+          <div class="dashboard-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-title">Stock Movement Overview</h3>
+                <div class="card-subtitle">Inbound receipts, customer dispatches, and inter-branch transfers</div>
+              </div>
+              <!-- 7D / 30D / 90D Range Tabs -->
+              <div class="chart-tabs-wrapper">
+                <button class="chart-tab-btn active" data-range="7d">7 Days</button>
+                <button class="chart-tab-btn" data-range="30d">30 Days</button>
+                <button class="chart-tab-btn" data-range="90d">90 Days</button>
+              </div>
+            </div>
+            <div style="height: 290px; position: relative;">
+              <canvas id="stockMovementChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Branch Stock Status Summary -->
+          <div class="dashboard-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-title">Regional Branch Status</h3>
+                <div class="card-subtitle">Stock capacity utilization across distribution nodes</div>
+              </div>
+              <button class="btn btn-outline-primary btn-sm" onclick="switchView('branches')">All Hubs</button>
+            </div>
+            <div class="branch-mini-list" id="branchCardsContainer">
+              <div style="text-align:center; padding:24px; color:#64748b;">Loading branch stock metrics...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 3: CATEGORY DISTRIBUTION & INVENTORY HEALTH (STEP 10) -->
+        <div class="row-category-health-grid">
+          
+          <!-- Stock by Category Doughnut Chart -->
+          <div class="dashboard-card">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="card-title">Stock by Category</h3>
+                <div class="card-subtitle">Network stock volume breakdown across appliance SKU families</div>
+              </div>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Inventory Health Index -->
+          <div class="inventory-health-box">
+            <div>
+              <div class="health-header">
+                <div>
+                  <div class="health-title">Inventory Health Index</div>
+                  <div class="health-sub">Derived from stock vs safety buffer invariants</div>
+                </div>
+                <div class="health-score" id="healthScoreValue">88.2%</div>
+              </div>
+
+              <!-- Multi-color Segmented Bar -->
+              <div class="health-meter-bar">
+                <div class="health-segment healthy" id="healthSegHealthy" style="width: 70%;" title="Healthy Stock"></div>
+                <div class="health-segment low" id="healthSegLow" style="width: 15%;" title="Low Stock"></div>
+                <div class="health-segment excess" id="healthSegExcess" style="width: 15%;" title="Excess Surplus"></div>
+              </div>
+
+              <!-- Legend Details -->
+              <div class="health-legend-grid">
+                <div class="health-legend-item">
+                  <span class="legend-color-dot" style="background:#22c55e;"></span>
+                  <span>Healthy: <strong id="healthPctHealthy">70%</strong></span>
+                </div>
+                <div class="health-legend-item">
+                  <span class="legend-color-dot" style="background:#ef4444;"></span>
+                  <span>Low: <strong id="healthPctLow">15%</strong></span>
+                </div>
+                <div class="health-legend-item">
+                  <span class="legend-color-dot" style="background:#a855f7;"></span>
+                  <span>Excess: <strong id="healthPctExcess">15%</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size:0.78rem; color:var(--blue-200); margin-top:14px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+              Protected by 1.65σ (95% C.I.) dynamic safety buffers. Zero secondary donor stockouts.
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 4: SMART STOCK TRANSFER RECOMMENDATIONS (STEP 10 & 11) -->
+        <section class="section-container">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Smart Stock Transfer Recommendations</h2>
+              <div class="section-subtitle">
+                Automated multi-branch rebalancing: identifies location shortage, selects surplus donor, protects safety buffer, and minimizes freight distance.
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="fetchRecommendationsData().then(renderRecommendationsFeed)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                Refresh Engine
+              </button>
+            </div>
+          </div>
+
+          <!-- Feed Container for 3-Box Flow Cards -->
+          <div id="recommendationsFeed" class="recommendations-container">
+            <div style="text-align:center; padding: 40px; color:#64748b;">
+              Loading verified stock balancing recommendations from recommender engine...
+            </div>
+          </div>
+        </section>
+
+        <!-- ROW 5: RECENT TRANSFERS / AUDIT LEDGER (STEP 10) -->
+        <section class="section-container">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Recent Inter-Branch Transfers & Audit Ledger</h2>
+              <div class="section-subtitle">Real-time ledger of completed, approved, and pending stock transfers</div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm" onclick="switchView('transfers')">Full Ledger</button>
+          </div>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Transfer ID</th>
+                  <th>Source Hub</th>
+                  <th>Destination Hub</th>
+                  <th>Product SKU</th>
+                  <th>Quantity</th>
+                  <th>Lead Time</th>
+                  <th>Est. Cost</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="transfersTableBody">
+                <tr><td colspan="8" style="text-align:center; padding: 24px; color:#64748b;">Loading transfer ledger...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </section>
+
+      <!-- ==================== VIEW 2: RECOMMENDATIONS (FULL) ==================== -->
+      <section class="view-panel" id="view-recommendations">
+        
+        <!-- Header & Action Toolbar -->
+        <div class="dashboard-card" style="margin-bottom: 20px;">
+          <div class="section-header" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <div>
+              <h2 class="section-title">All Transfer Recommendations & Safety Audit</h2>
+              <div class="section-subtitle">Review, approve, reject, or manually override balancing actions with audit trail</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <!-- View mode toggle: Flow Cards vs Table -->
+              <div style="display:inline-flex; border:1px solid var(--slate-300); border-radius:var(--radius-md); overflow:hidden; background:var(--white);">
+                <button type="button" id="recViewCardsBtn" class="btn btn-sm btn-primary" onclick="setRecViewMode('cards')" style="border-radius:0; border:none; padding:6px 14px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  Flow Cards
+                </button>
+                <button type="button" id="recViewTableBtn" class="btn btn-sm btn-secondary" onclick="setRecViewMode('table')" style="border-radius:0; border:none; padding:6px 14px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                  Audit Table
+                </button>
+              </div>
+
+              <!-- Refresh Button -->
+              <button class="btn btn-secondary btn-sm" onclick="reloadRecommendationsView()" id="recReloadBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                Refresh Engine
+              </button>
+
+              <!-- New Manual Transfer Button -->
+              <button class="btn btn-primary btn-sm" onclick="openCreateTransferModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Manual Transfer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Summary Cards (KPIs) -->
+        <div class="kpi-grid" style="margin-bottom: 20px;">
+          <!-- 1. Active Recommendations -->
+          <div class="kpi-card blue">
+            <div class="kpi-top">
+              <div>
+                <div class="kpi-label">Active Recommendations</div>
+                <div class="kpi-value" id="summaryActiveRecs">Loading...</div>
+              </div>
+              <div class="kpi-icon-pill blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-subtext" id="summaryActiveRecsSubtext">Safe lateral stock transfer legs</div>
+          </div>
+
+          <!-- 2. Critical Shortages -->
+          <div class="kpi-card red">
+            <div class="kpi-top">
+              <div>
+                <div class="kpi-label">Critical Shortages</div>
+                <div class="kpi-value" id="summaryCriticalShortages">0</div>
+              </div>
+              <div class="kpi-icon-pill red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-subtext">Urgent stockout priority cases</div>
+          </div>
+
+          <!-- 3. Pending Approval -->
+          <div class="kpi-card amber">
+            <div class="kpi-top">
+              <div>
+                <div class="kpi-label">Pending Approval</div>
+                <div class="kpi-value" id="summaryPendingApproval">0</div>
+              </div>
+              <div class="kpi-icon-pill amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-subtext">Awaiting operator sign-off</div>
+          </div>
+
+          <!-- 4. Potential Transfer Units -->
+          <div class="kpi-card green">
+            <div class="kpi-top">
+              <div>
+                <div class="kpi-label">Potential Transfer Units</div>
+                <div class="kpi-value" id="summaryPotentialUnits">0</div>
+              </div>
+              <div class="kpi-icon-pill green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="17 1 21 5 17 9"></polyline>
+                  <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                  <polyline points="7 23 3 19 7 15"></polyline>
+                  <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-subtext">Avoiding external purchase spend</div>
+          </div>
+        </div>
+
+        <!-- Filter Bar Card -->
+        <div class="dashboard-card" style="margin-bottom: 20px; padding: 18px 20px;">
+          <div style="font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--slate-500); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;">
+            <span>Filter Balancing Recommendations</span>
+            <button class="btn btn-outline-primary btn-sm" onclick="resetRecFilters()" style="padding:2px 8px; font-size:0.75rem;">Clear All Filters</button>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items:end;">
+            <!-- Search -->
+            <div style="grid-column: span 2; min-width: 200px;">
+              <label class="form-label" style="font-size:0.75rem; margin-bottom:4px;" for="recFilterSearch">Search</label>
+              <input type="text" id="recFilterSearch" class="form-input" placeholder="Search ID, branch, SKU, city..." style="padding:7px 10px; font-size:0.82rem;" oninput="applyRecFilters()" />
+            </div>
+
+            <!-- Branch -->
+            <div>
+              <label class="form-label" style="font-size:0.75rem; margin-bottom:4px;" for="recFilterBranch">Branch / Hub</label>
+              <select id="recFilterBranch" class="form-select" style="padding:7px 10px; font-size:0.82rem;" onchange="onRecFilterBranchChange()">
+                <option value="ALL">All Branches (Network-Wide)</option>
+                <option value="B001">Chennai Hub (B001)</option>
+                <option value="B002">Coimbatore Hub (B002)</option>
+                <option value="B003">Madurai Hub (B003)</option>
+                <option value="B004">Salem Hub (B004)</option>
+                <option value="B005">Trichy Hub (B005)</option>
+                <option value="B006">Tiruppur Hub (B006)</option>
+                <option value="B007">Erode Hub (B007)</option>
+                <option value="B008">Vellore Hub (B008)</option>
+              </select>
+            </div>
+
+            <!-- Product/SKU -->
+            <div>
+              <label class="form-label" style="font-size:0.75rem; margin-bottom:4px;" for="recFilterProduct">Product / SKU</label>
+              <select id="recFilterProduct" class="form-select" style="padding:7px 10px; font-size:0.82rem;" onchange="applyRecFilters()">
+                <option value="ALL">All Products</option>
+                <option value="P001">P001 - LED TV</option>
+                <option value="P002">P002 - Refrigerator</option>
+                <option value="P003">P003 - Washing Machine</option>
+                <option value="P004">P004 - Microwave</option>
+                <option value="P005">P005 - Laptop</option>
+                <option value="P006">P006 - Smartphone</option>
+                <option value="P007">P007 - Printer</option>
+                <option value="P008">P008 - Air Conditioner</option>
+                <option value="P009">P009 - Router</option>
+                <option value="P010">P010 - Monitor</option>
+              </select>
+            </div>
+
+            <!-- Priority -->
+            <div>
+              <label class="form-label" style="font-size:0.75rem; margin-bottom:4px;" for="recFilterPriority">Priority</label>
+              <select id="recFilterPriority" class="form-select" style="padding:7px 10px; font-size:0.82rem;" onchange="applyRecFilters()">
+                <option value="ALL">All Priorities</option>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+
+            <!-- Status -->
+            <div>
+              <label class="form-label" style="font-size:0.75rem; margin-bottom:4px;" for="recFilterStatus">Status</label>
+              <select id="recFilterStatus" class="form-select" style="padding:7px 10px; font-size:0.82rem;" onchange="applyRecFilters()">
+                <option value="ALL">All Statuses</option>
+                <option value="PENDING">Pending Approval</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="OVERRIDDEN">Overridden</option>
+              </select>
+            </div>
+
+            <!-- Date -->
+            <div>
+              <label class="form-label" style="font-size:0.75rem; margin-bottom:4px;" for="recFilterDate">Date</label>
+              <select id="recFilterDate" class="form-select" style="padding:7px 10px; font-size:0.82rem;" onchange="applyRecFilters()">
+                <option value="ALL">All Dates</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Area: Recommendations List (Cards / Table) -->
+        <div id="fullRecommendationsContainer">
+          <!-- Populated dynamically with Loading, Error, Empty, or Cards/Table -->
+        </div>
+
+      </section>
+
+      <!-- ==================== VIEW 3: BRANCHES (DIRECTORY) ==================== -->
+      <section class="view-panel" id="view-branches">
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Regional Distribution Branches</h2>
+              <div class="section-subtitle">Full hub directory across Tamil Nadu with capacity bounds and SKU balances</div>
+            </div>
+          </div>
+          <div class="branch-cards-grid" id="branchesViewGrid" style="margin-top:18px;">
+            <!-- Loaded dynamically from /api/branches -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 4: TRANSFERS & AUDIT ==================== -->
+      <section class="view-panel" id="view-transfers">
+        <div class="dashboard-card">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="section-title">Inter-Branch Transfer Ledger</h2>
+              <div class="section-subtitle">Historical and active stock movements with governance approvals</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openCreateTransferModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Manual Transfer
+            </button>
+          </div>
+          
+          <div class="data-table-wrapper" style="margin-top: 16px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Transfer ID</th>
+                  <th>Source Hub</th>
+                  <th>Destination Hub</th>
+                  <th>Product SKU</th>
+                  <th>Quantity</th>
+                  <th>Lead Time</th>
+                  <th>Est. Cost</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="transfersTableBodyDuplicate">
+                <tr><td colspan="8" style="text-align:center; padding: 24px; color:#64748b;">Loading transfer ledger...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 5: STOCK OVERVIEW ==================== -->
+      <section class="view-panel" id="view-stock-overview">
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Comprehensive SKU Inventory Ledger</h2>
+              <div class="section-subtitle">All products across branches with safety stock invariants and lead time buffers</div>
+            </div>
+          </div>
+          <div class="data-table-wrapper" style="margin-top: 16px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Product ID</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Total Network Stock</th>
+                  <th>Avg Unit Cost</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>P001</strong></td><td>LED TV</td><td>Electronics</td><td>293 units</td><td>₹35,000</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P002</strong></td><td>Refrigerator</td><td>Appliances</td><td>286 units</td><td>₹28,500</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P003</strong></td><td>Washing Machine</td><td>Appliances</td><td>224 units</td><td>₹22,000</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P004</strong></td><td>Microwave</td><td>Appliances</td><td>256 units</td><td>₹12,500</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P005</strong></td><td>Laptop</td><td>Computing</td><td>271 units</td><td>₹55,000</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P006</strong></td><td>Smartphone</td><td>Mobile</td><td>278 units</td><td>₹24,000</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P007</strong></td><td>Printer</td><td>Office</td><td>245 units</td><td>₹14,500</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P008</strong></td><td>Air Conditioner</td><td>Appliances</td><td>223 units</td><td>₹42,000</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P009</strong></td><td>Router</td><td>Networking</td><td>248 units</td><td>₹3,500</td><td><span class="status-badge green">Healthy</span></td></tr>
+                <tr><td><strong>P010</strong></td><td>Monitor</td><td>Computing</td><td>236 units</td><td>₹16,000</td><td><span class="status-badge green">Healthy</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 6: AUDIT & REPORTS ==================== -->
+      <section class="view-panel" id="view-reports">
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Stakeholder Governance & Pipeline Reports</h2>
+              <div class="section-subtitle">Reproducible baseline audits, cost savings model, and algorithm validation</div>
+            </div>
+            <a href="/api/recommendations" target="_blank" class="btn btn-outline-primary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Export JSON
+            </a>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 18px;">
+            <div style="padding: 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius: 8px;">
+              <h4 style="font-size:0.92rem; font-weight:700; color:#0f172a; margin-bottom:6px;">Safety Stock Invariant Guarantee</h4>
+              <p style="font-size:0.8rem; color:#475569; line-height:1.5;">Every recommended donor transfer verifies that donor stock remaining is strictly above the safety stock threshold, with 0 secondary stockouts created.</p>
+            </div>
+            <div style="padding: 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius: 8px;">
+              <h4 style="font-size:0.92rem; font-weight:700; color:#0f172a; margin-bottom:6px;">Audited Cost Minimization</h4>
+              <p style="font-size:0.8rem; color:#475569; line-height:1.5;">Recommender uses pre-computed transit distances and rates (₹3/km/unit) to ensure internal freight cost is substantially below rush procurement premiums.</p>
+            </div>
+            <div style="padding: 16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius: 8px;">
+              <h4 style="font-size:0.92rem; font-weight:700; color:#0f172a; margin-bottom:6px;">Human-in-the-Loop Governance</h4>
+              <p style="font-size:0.8rem; color:#475569; line-height:1.5;">High-impact transfers requiring &gt;25 units require mandatory supervisor approval or recorded justification logged permanently into SQLite audit tables.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 7: SETTINGS ==================== -->
+      <section class="view-panel" id="view-settings">
+        <div class="dashboard-card">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Engine Configuration & Invariant Thresholds</h2>
+              <div class="section-subtitle">Real-time parameters governing donor selection and transfer feasibility</div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 18px;">
+            <div style="background:#f8fafc; padding:16px; border:1px solid #e2e8f0; border-radius:8px;">
+              <div style="font-size:0.75rem; color:#64748b; font-weight:600; text-transform:uppercase;">Forecast Safety Stock Multiplier</div>
+              <div style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-top:4px;">1.65 σ (95% C.I.)</div>
+            </div>
+            <div style="background:#f8fafc; padding:16px; border:1px solid #e2e8f0; border-radius:8px;">
+              <div style="font-size:0.75rem; color:#64748b; font-weight:600; text-transform:uppercase;">High Impact Threshold</div>
+              <div style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-top:4px;">&gt; 25 Units / Transfer</div>
+            </div>
+            <div style="background:#f8fafc; padding:16px; border:1px solid #e2e8f0; border-radius:8px;">
+              <div style="font-size:0.75rem; color:#64748b; font-weight:600; text-transform:uppercase;">Maximum Transit Radius</div>
+              <div style="font-size:1.2rem; font-weight:700; color:#0f172a; margin-top:4px;">500 km (Inter-State Cap)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== ALERTS SLIDE-OUT DRAWER ==================== -->
+  <div class="alerts-drawer" id="alertsDrawer">
+    <div class="alerts-drawer-header">
+      <div>
+        <h3 style="font-size: 1rem; font-weight: 700; color: #0f172a;">Operational Alerts</h3>
+        <div style="font-size: 0.75rem; color: #64748b;">Real-time inventory thresholds & balancing activity</div>
+      </div>
+      <button class="alerts-drawer-close" id="closeAlertsBtn" aria-label="Close alerts">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="alerts-drawer-content" id="alertsListContainer">
+      <div style="text-align:center; padding:20px; color:#64748b;">No active operational alerts.</div>
+    </div>
+  </div>
+
+  <!-- ==================== CREATE TRANSFER MODAL (STEP 7) ==================== -->
+  <div class="modal-backdrop" id="createTransferModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Authorize & Create Stock Transfer</h3>
+          <div class="modal-subtitle">Transfer units from surplus branch to solve destination shortage</div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeCreateTransferModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="createTransferForm">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="transferSourceBranch">Source Branch (Donor)</label>
+              <select class="form-select" id="transferSourceBranch" required>
+                <option value="B001">Chennai Hub (B001)</option>
+                <option value="B002">Coimbatore Hub (B002)</option>
+                <option value="B003">Madurai Hub (B003)</option>
+                <option value="B004">Salem Hub (B004)</option>
+                <option value="B005">Trichy Hub (B005)</option>
+                <option value="B006">Tiruppur Hub (B006)</option>
+                <option value="B007">Erode Hub (B007)</option>
+                <option value="B008">Vellore Hub (B008)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="transferDestBranch">Destination Branch (Shortage)</label>
+              <select class="form-select" id="transferDestBranch" required>
+                <option value="B001">Chennai Hub (B001)</option>
+                <option value="B002">Coimbatore Hub (B002)</option>
+                <option value="B003">Madurai Hub (B003)</option>
+                <option value="B004">Salem Hub (B004)</option>
+                <option value="B005">Trichy Hub (B005)</option>
+                <option value="B006">Tiruppur Hub (B006)</option>
+                <option value="B007">Erode Hub (B007)</option>
+                <option value="B008">Vellore Hub (B008)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="transferProduct">Product SKU</label>
+              <select class="form-select" id="transferProduct" required>
+                <option value="P001">LED TV (P001)</option>
+                <option value="P002">Refrigerator (P002)</option>
+                <option value="P003">Washing Machine (P003)</option>
+                <option value="P004">Microwave (P004)</option>
+                <option value="P005">Laptop (P005)</option>
+                <option value="P006">Smartphone (P006)</option>
+                <option value="P007">Printer (P007)</option>
+                <option value="P008">Air Conditioner (P008)</option>
+                <option value="P009">Router (P009)</option>
+                <option value="P010">Monitor (P010)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="transferQuantity">Transfer Quantity (Units)</label>
+              <input type="number" class="form-input" id="transferQuantity" min="1" step="1" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="transferPriority">Priority Level</label>
+              <select class="form-select" id="transferPriority">
+                <option value="HIGH">HIGH (Urgent Shortage)</option>
+                <option value="MEDIUM" selected>MEDIUM (Standard Balancing)</option>
+                <option value="LOW">LOW (Proactive Leveling)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="transferReason">Rebalancing Reason</label>
+              <input type="text" class="form-input" id="transferReason" placeholder="Reason for transfer" required />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateTransferModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm & Create Transfer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== OVERRIDE REASON MODAL (STEP 8) ==================== -->
+  <div class="modal-backdrop" id="overrideModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Supervisor Override Justification</h3>
+          <div class="modal-subtitle">Manual overrides are permanently recorded in the audit database</div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeOverrideModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <form id="overrideForm">
+        <input type="hidden" id="overrideRecId" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="overrideReasonInput">Mandatory Override Reason</label>
+            <textarea class="form-textarea" id="overrideReasonInput" rows="4" placeholder="Enter explicit business reason for overriding this recommendation (e.g., local customer reservation, maintenance hold, VIP order priority)..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeOverrideModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:#7c3aed;">Save Override</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== RECOMMENDATION DETAILS & SAFETY AUDIT MODAL ==================== -->
+  <div class="modal-backdrop" id="recDetailsModal">
+    <div class="modal-container" style="max-width: 720px; width: 92%;">
+      <div class="modal-header">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <h3 class="modal-title" id="recDetailsModalTitle">Recommendation Details</h3>
+            <span class="rec-id-badge" id="recDetailsModalId">REC00001</span>
+            <span class="status-badge" id="recDetailsModalStatus">PENDING</span>
+          </div>
+          <div class="modal-subtitle" id="recDetailsModalSubtitle">Safety stock protection, route feasibility, and governance audit record</div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeRecDetailsModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="recDetailsModalBody">
+        <!-- Injected dynamically by openRecDetailsModal(recId) -->
+      </div>
+      <div class="modal-footer" id="recDetailsModalFooter" style="display:flex; justify-content:space-between;">
+        <button type="button" class="btn btn-secondary" onclick="closeRecDetailsModal()">Close</button>
+        <div style="display:flex; gap:8px;" id="recDetailsModalActions">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main JavaScript Logic -->
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

@@ -37,3 +37,19 @@ htmlcov/
 Thumbs.db
 Desktop.ini
 .DS_Store
+*.lnk
+
+# Presentation & Unnecessary Binaries
+*.pptx
+*.ppt
+*.pdf
+*.zip
+*.tar.gz
+
+# Runtime Generated Databases & Artifacts
+*.db
+*.sqlite
+*.sqlite3
+outputs/*.db
+outputs/*.sqlite
+test_*.db

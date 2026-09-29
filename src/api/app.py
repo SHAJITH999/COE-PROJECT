@@ -8,10 +8,12 @@ Handles human approval, rejection, and override workflows with SQLite persistenc
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Body
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from src.data.loader import load_transfer_routes
@@ -27,16 +29,31 @@ from src.api.db import (
     init_db, seed_recommendations, record_decision,
     get_approval_status, get_all_approvals, is_high_impact, DB_PATH
 )
+from src.api.dashboard_routes import router as dashboard_router
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 PROCESSED_DATA_DIR = PROJECT_ROOT / "data" / "processed"
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+STATIC_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
     title="Inventory Balancing Recommender API",
     description="Multi-Location Inventory Balancing & Transfer Recommender System",
     version="1.0.0"
 )
+
+app.include_router(dashboard_router)
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+@app.get("/")
+def serve_dashboard():
+    """Serves the main enterprise dashboard."""
+    index_file = STATIC_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    return {"status": "healthy", "service": "Inventory Balancing Recommender API", "dashboard": "Loading static files"}
 
 
 # ── Pydantic Schemas ─────────────────────────────────────────────────────────
@@ -96,7 +113,7 @@ def health():
     return {
         "status": "healthy",
         "service": "Inventory Balancing Recommender API",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 
@@ -179,7 +196,7 @@ def approve(req: ApproveRequest):
         "recommendation_id": req.recommendation_id,
         "status": "APPROVED",
         "is_high_impact": approval["is_high_impact"],
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 
@@ -193,7 +210,7 @@ def reject(req: RejectRequest):
     return {
         "recommendation_id": req.recommendation_id,
         "status": "REJECTED",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 
@@ -213,5 +230,5 @@ def override(req: OverrideRequest):
         "recommendation_id": req.recommendation_id,
         "status": "OVERRIDDEN",
         "override_reason": req.override_reason.strip(),
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }

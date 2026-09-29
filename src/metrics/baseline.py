@@ -50,29 +50,8 @@ def calculate_service_level(total_shortage: float, total_forecast_demand: float)
     return float(np.clip(service_level, 0.0, 1.0))
 
 
-def evaluate_forecast_quality(actual: pd.Series, forecast: pd.Series) -> Dict[str, float]:
-    """
-    Evaluate existing forecast quality metrics (MAE, RMSE, MAPE).
-    
-    Zero handling for MAPE:
-    - Records with actual_demand == 0 are excluded to prevent division by zero.
-    """
-    errors = actual - forecast
-    mae = float(np.mean(np.abs(errors)))
-    rmse = float(np.sqrt(np.mean(errors ** 2)))
-    
-    # MAPE calculation avoiding division by zero
-    non_zero_mask = actual != 0
-    if non_zero_mask.sum() > 0:
-        mape = float(np.mean(np.abs(errors[non_zero_mask] / actual[non_zero_mask])) * 100.0)
-    else:
-        mape = 0.0
-        
-    return {
-        "Forecast MAE": round(mae, 4),
-        "Forecast RMSE": round(rmse, 4),
-        "Forecast MAPE (%)": round(mape, 4)
-    }
+# Import forecast evaluation metrics from dedicated forecasting module
+from src.forecasting.validation import evaluate_forecast_quality
 
 
 def compute_baseline_summary(df: pd.DataFrame, forecast_metrics: Dict[str, float]) -> pd.DataFrame:

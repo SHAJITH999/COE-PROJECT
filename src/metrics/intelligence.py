@@ -31,26 +31,12 @@ def calculate_inventory_status(shortage_units: pd.Series, surplus_units: pd.Seri
     return pd.Series(np.select(conditions, choices, default="BALANCED"), index=shortage_units.index)
 
 
-def calculate_stock_coverage_ratio(inventory_position: pd.Series, forecast_demand: pd.Series) -> pd.Series:
-    """
-    Calculate Stock_Coverage_Ratio = Inventory_Position / Forecast_Demand.
-    Returns 0.0 when Forecast_Demand is 0.
-    """
-    return np.where(forecast_demand == 0, 0.0, inventory_position / forecast_demand)
-
-
-def calculate_demand_gap(forecast_demand: pd.Series, inventory_position: pd.Series) -> pd.Series:
-    """
-    Calculate Demand_Gap = Forecast_Demand - Inventory_Position.
-    """
-    return forecast_demand - inventory_position
-
-
-def calculate_safety_stock_gap(inventory_position: pd.Series, safety_stock: pd.Series) -> pd.Series:
-    """
-    Calculate Safety_Stock_Gap = Inventory_Position - Safety_Stock.
-    """
-    return inventory_position - safety_stock
+# Import demand features from dedicated forecasting architecture
+from src.forecasting.features import (
+    calculate_stock_coverage_ratio,
+    calculate_demand_gap,
+    calculate_safety_stock_gap,
+)
 
 
 def generate_inventory_intelligence(

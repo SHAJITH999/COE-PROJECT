@@ -68,13 +68,19 @@ def generate_recommendations(
             if transfer_qty <= 0:
                 continue
                 
-            # Determine recommendation type
-            # If this single transfer covers full shortage_before -> TRANSFER
-            # If partial transfer -> PARTIAL_TRANSFER_AND_PURCHASE or TRANSFER leg
-            rec_type = "TRANSFER" if transfer_qty == shortage_before else "TRANSFER"
+            # Inter-branch transfer leg recommendation.
+            # All successful transfer allocations are recorded as 'TRANSFER'.
+            # If remaining shortage cannot be fulfilled by transfers, subsequent leg is recorded as 'PARTIAL_TRANSFER_AND_PURCHASE'.
+            rec_type = "TRANSFER"
+            
+            coverage_desc = (
+                f"Full shortage satisfied ({int(transfer_qty)} units)"
+                if transfer_qty == shortage_before
+                else f"Partial transfer leg covering {int(transfer_qty)} of {int(shortage_before)} shortage units"
+            )
             
             evidence = (
-                f"Source {source_branch} has {int(avail_surplus)} usable surplus units; "
+                f"{coverage_desc}; Source {source_branch} has {int(avail_surplus)} usable surplus units; "
                 f"safety stock protected; route feasible; transfer time {transfer_time}h; "
                 f"capacity {int(capacity)} units."
             )

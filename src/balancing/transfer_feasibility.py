@@ -24,7 +24,23 @@ def get_route_info(
 ) -> Optional[pd.Series]:
     """
     Find matching route record from source_branch to dest_branch.
+    Uses cached lookup dict for performance when available.
     """
+    # Fast path: use cached dict in routes_df.attrs if available
+    cache = routes_df.attrs.get("_route_lookup_cache") if hasattr(routes_df, "attrs") else None
+    if cache is None and isinstance(routes_df, pd.DataFrame):
+        try:
+            cache = {}
+            for _, r in routes_df.iterrows():
+                cache[(str(r["Source_Branch"]), str(r["Destination_Branch"]))] = r
+            if hasattr(routes_df, "attrs"):
+                routes_df.attrs["_route_lookup_cache"] = cache
+        except Exception:
+            cache = None
+
+    if cache is not None:
+        return cache.get((str(source_branch), str(dest_branch)))
+
     matches = routes_df[
         (routes_df["Source_Branch"] == source_branch) &
         (routes_df["Destination_Branch"] == dest_branch)

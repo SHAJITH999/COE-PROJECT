@@ -215,3 +215,64 @@ def test_approve_invalid_id(api_client):
     """POST /approve with non-existent ID must return 404."""
     response = api_client.post("/approve", json={"recommendation_id": "INVALID_ID_XYZ"})
     assert response.status_code == 404
+
+
+def test_reject_invalid_id(api_client):
+    """POST /reject with non-existent ID must return 404."""
+    response = api_client.post("/reject", json={"recommendation_id": "INVALID_ID_XYZ"})
+    assert response.status_code == 404
+
+
+def test_override_invalid_id(api_client):
+    """POST /override with non-existent ID must return 404."""
+    response = api_client.post("/override", json={
+        "recommendation_id": "INVALID_ID_XYZ",
+        "override_reason": "Testing invalid ID"
+    })
+    assert response.status_code == 404
+
+
+def test_recommend_invalid_scenario(api_client):
+    """POST /recommend with unknown scenario must return 400."""
+    response = api_client.post("/recommend", json={"scenario": "INVALID_SCENARIO_123"})
+    assert response.status_code == 400
+
+
+def test_audit_trail_retrieval_and_preservation(tmp_db):
+    """Verify original recommendation and decision audit trail are fully preserved."""
+    init_db(tmp_db)
+    original_rec = {
+        "Recommendation_ID": "REC_AUDIT_01",
+        "Source_Branch": "B001",
+        "Destination_Branch": "B002",
+        "Product_ID": "P001",
+        "Recommended_Quantity": 25.0,
+        "Estimated_Cost": 350.0,
+        "Service_Urgency": "High"
+    }
+    seed_recommendations([original_rec], db_path=tmp_db)
+    
+    # 1. Check initial pending status
+    status_before = get_approval_status("REC_AUDIT_01", db_path=tmp_db)
+    assert status_before is not None
+    assert status_before["status"] == "PENDING"
+    assert status_before["is_high_impact"] is True  # Quantity >= 20 threshold
+    
+    # 2. Record human override
+    reason = "Logistics supervisor rerouted via alternate hub"
+    success = record_decision("REC_AUDIT_01", "OVERRIDDEN", override_reason=reason, db_path=tmp_db)
+    assert success is True
+    
+    # 3. Retrieve audit record
+    audit = get_approval_status("REC_AUDIT_01", db_path=tmp_db)
+    assert audit["status"] == "OVERRIDDEN"
+    assert audit["override_reason"] == reason
+    assert audit["timestamp"] is not None
+    
+    # 4. Check all approvals listing
+    all_approvals = get_all_approvals(db_path=tmp_db)
+    assert len(all_approvals) >= 1
+    matched = [a for a in all_approvals if a["recommendation_id"] == "REC_AUDIT_01"]
+    assert len(matched) == 1
+    assert matched[0]["status"] == "OVERRIDDEN"
+
