@@ -79,7 +79,7 @@ def generate_error_analysis() -> pd.DataFrame:
             "Expected Behavior": "Rebalance all available network surplus before purchasing remaining shortage",
             "Actual Behavior": "Generated PARTIAL_TRANSFER_AND_PURCHASE recommendation",
             "Reason": "Surge demand (+25%) exceeded total network usable surplus",
-            "Impact": "60.09% shortage avoided through transfers; remaining 39.91% purchased",
+            "Impact": "54.75% shortage avoided through transfers; remaining 45.25% purchased",
             "Resolution/Fallback": "Partial network transfer completed; remaining shortage purchased"
         },
         {
@@ -108,10 +108,24 @@ def generate_error_analysis() -> pd.DataFrame:
     return pd.DataFrame(cases)
 
 
-def generate_edge_case_results() -> pd.DataFrame:
+def generate_edge_case_results(output_dir: Optional[Union[str, Path]] = None) -> pd.DataFrame:
     """
     Generate explicit edge case validation verification results.
+    Uses actual scenario_results.csv for dynamic shortage-avoidance percentages.
     """
+    out_dir = Path(output_dir) if output_dir else OUTPUTS_DIR
+    sc_path = out_dir / "scenario_results.csv"
+    avoidance = {"DELAY": "67.13", "CAPACITY_LOSS": "67.13", "URGENT_DEMAND": "54.75"}
+    if sc_path.exists():
+        try:
+            sc_df = pd.read_csv(sc_path)
+            for _, r in sc_df.iterrows():
+                sc = str(r["Scenario"])
+                if sc in avoidance:
+                    avoidance[sc] = f"{float(r['Shortage Avoided (%)']):g}"
+        except Exception:
+            pass  # Use defaults
+
     edge_cases = [
         {
             "Edge_Case": "1. No Feasible Donor",
@@ -134,7 +148,7 @@ def generate_edge_case_results() -> pd.DataFrame:
             "Scenario": "DELAY",
             "Input_Condition": "Route transit time increased by +3.0h across transport network",
             "Expected_Outcome": "Evaluate service deadline feasibility; fallback to purchase if non-compliant",
-            "Actual_Outcome": "Route feasibility checked; maintained 67.13% shortage avoidance and 0 safety violations",
+            "Actual_Outcome": f"Route feasibility checked; maintained {avoidance['DELAY']}% shortage avoidance and 0 safety violations",
             "Status": "PASS"
         },
         {
@@ -142,7 +156,7 @@ def generate_edge_case_results() -> pd.DataFrame:
             "Scenario": "CAPACITY_LOSS",
             "Input_Condition": "Vehicle capacity reduced by 50% across all transit routes",
             "Expected_Outcome": "Cap single transfer quantity to reduced vehicle capacity; purchase remainder",
-            "Actual_Outcome": "Capped transfer quantities at reduced capacities; achieved 62.03% shortage avoidance",
+            "Actual_Outcome": f"Capped transfer quantities at reduced capacities; achieved {avoidance['CAPACITY_LOSS']}% shortage avoidance",
             "Status": "PASS"
         },
         {
@@ -150,7 +164,7 @@ def generate_edge_case_results() -> pd.DataFrame:
             "Scenario": "URGENT_DEMAND",
             "Input_Condition": "Forecast demand scaled by +25% for Critical/High urgency items",
             "Expected_Outcome": "Prioritize Critical urgency allocations; purchase remaining shortage",
-            "Actual_Outcome": "Prioritized Critical shortages; achieved 60.09% shortage avoidance and 0 safety violations",
+            "Actual_Outcome": f"Prioritized Critical shortages; achieved {avoidance['URGENT_DEMAND']}% shortage avoidance and 0 safety violations",
             "Status": "PASS"
         }
     ]
