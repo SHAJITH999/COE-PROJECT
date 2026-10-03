@@ -89,6 +89,9 @@ def record_decision(
     """
     Record an APPROVED, REJECTED, or OVERRIDDEN decision for a recommendation.
     Returns True if the recommendation was found and updated.
+    
+    For OVERRIDDEN decisions, `override_reason` is required to ensure human accountability
+    and maintain a strict audit trail for why an algorithmic recommendation was modified.
     """
     path = db_path or DB_PATH
     conn = sqlite3.connect(str(path))

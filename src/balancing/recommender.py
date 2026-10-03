@@ -54,6 +54,7 @@ def generate_recommendations(
         transfers_made = 0
         
         for donor in feasible_donors:
+            # If the shortage is fully satisfied by previous donors, stop evaluating.
             if remaining_shortage <= 0:
                 break
                 
@@ -107,12 +108,21 @@ def generate_recommendations(
             })
             
             rec_counter += 1
-            donor_pool_state.deduct_surplus(date, source_branch, product_id, transfer_qty)
+            
+            # Reduce the remaining shortage only by the quantity actually transferred 
+            # so the uncovered amount can be correctly converted into a purchase need.
             remaining_shortage -= transfer_qty
+            
+            # Deduct the transferred quantity from the global donor state
+            # to prevent subsequent shortages from over-allocating the same donor stock.
+            donor_pool_state.deduct_surplus(date, source_branch, product_id, transfer_qty)
+            
             transfers_made += 1
             
         # If remaining shortage > 0, generate PURCHASE recommendation
         if remaining_shortage > 0:
+            # The purchase cost is purely the unit purchase price * remaining units,
+            # representing the exact capital required to fulfill what the network couldn't.
             purchase_cost = remaining_shortage * unit_purchase_cost
             rec_type = "PURCHASE" if transfers_made == 0 else "PARTIAL_TRANSFER_AND_PURCHASE"
             evidence = (

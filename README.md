@@ -273,6 +273,18 @@ Every recommendation produces structured evidence detailing:
   - `OVERRIDE`: Modifies decision; **strictly requires a non-empty human justification string**.
 - **Audit Persistence**: Stored in `outputs/approvals.db` with full original recommendation JSON, decision, override reason, and UTC timestamp.
 
+### Database Schema Documentation
+The system uses a lightweight SQLite database (`outputs/approvals.db`) to persist the human-in-the-loop audit trail.
+
+**Table: `approvals`**
+- **`id`** (`INTEGER PRIMARY KEY AUTOINCREMENT`): Internal incremental unique identifier.
+- **`recommendation_id`** (`TEXT NOT NULL UNIQUE`): The business ID (e.g. `REC00001`) linking back to the recommendation artifact.
+- **`status`** (`TEXT NOT NULL DEFAULT 'PENDING'`): Current workflow state. Expected values: `PENDING`, `APPROVED`, `REJECTED`, `OVERRIDDEN`.
+- **`original_recommendation`** (`TEXT`): Full JSON-serialized payload of the recommendation at the time of creation (preserves state even if source data changes).
+- **`override_reason`** (`TEXT`): Human-provided string explaining the reason for an override action. Left `NULL` for standard approvals/rejections.
+- **`timestamp`** (`TEXT`): ISO-8601 formatted UTC timestamp of the last decision action.
+- **`is_high_impact`** (`INTEGER DEFAULT 0`): Boolean flag (`1` or `0`) marking if the recommendation met critical, cost, or volume thresholds requiring heightened scrutiny.
+
 ---
 
 ## 13. REST API Service
@@ -282,17 +294,52 @@ uvicorn src.api.app:app --port 8000
 ```
 Interactive Swagger UI: `http://localhost:8000/docs`
 
-### Endpoints
+### Endpoint Documentation
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/health` | Health status and UTC timestamp |
-| `GET` | `/metrics` | Baseline and recommender performance metrics |
-| `POST` | `/recommend` | Generate recommendations for a scenario (`NORMAL`, `DELAY`, etc.) |
-| `POST` | `/simulate` | Run baseline vs. proposed disruption experiment |
-| `POST` | `/approve` | Approve a recommendation (checks high-impact flag) |
-| `POST` | `/reject` | Reject a recommendation |
-| `POST` | `/override` | Override a recommendation (**requires `override_reason`**) |
+#### `GET /health`
+- **Purpose**: Health check endpoint to verify API and server status.
+- **Inputs**: None.
+- **Response Structure**: JSON containing `status`, `service`, and `timestamp`.
+- **Status/Errors**: `200 OK` on success.
+- **Example Response**: `{"status": "healthy", "service": "Inventory Balancing Recommender API", "timestamp": "2026-09-29T10:00:00+00:00"}`
+
+#### `GET /metrics`
+- **Purpose**: Returns baseline and recommender summary metrics for dashboard display.
+- **Inputs**: None.
+- **Response Structure**: JSON with lists for `baseline_metrics`, `recommender_metrics`, and `experiment_summary`.
+- **Status/Errors**: `200 OK` on success (returns empty lists if data files are missing).
+
+#### `POST /recommend`
+- **Purpose**: Generate transfer and purchase recommendations for a given disruption scenario.
+- **Required Inputs**: `scenario` (string in body, e.g., `"NORMAL"`, default `"NORMAL"`).
+- **Response Structure**: JSON with `scenario`, `total_recommendations`, `recommendations` (list of dicts), and `metrics`.
+- **Status/Errors**: `200 OK` on success. `400 Bad Request` if scenario is invalid. `503 Service Unavailable` if Phase 2 pipeline was not run.
+- **Example Request**: `{"scenario": "NORMAL"}`
+
+#### `POST /simulate`
+- **Purpose**: Run baseline vs proposed experiment for a given disruption scenario.
+- **Required Inputs**: `scenario` (string: `NORMAL`, `DELAY`, `CAPACITY_LOSS`, or `URGENT_DEMAND`).
+- **Response Structure**: JSON with `scenario`, `experiment_metrics`, and `recommendation_metrics`.
+- **Status/Errors**: `200 OK`. `400 Bad Request` for invalid scenario strings.
+
+#### `POST /approve`
+- **Purpose**: Approve a specific recommendation, flagging it for execution.
+- **Required Inputs**: `recommendation_id` (string).
+- **Response Structure**: JSON with `status: "APPROVED"`, `is_high_impact` flag, and `timestamp`.
+- **Status/Errors**: `200 OK`. `404 Not Found` if ID does not exist in DB.
+
+#### `POST /reject`
+- **Purpose**: Reject a specific recommendation, preventing its execution.
+- **Required Inputs**: `recommendation_id` (string).
+- **Response Structure**: JSON with `status: "REJECTED"` and `timestamp`.
+- **Status/Errors**: `200 OK`. `404 Not Found` if ID does not exist in DB.
+
+#### `POST /override`
+- **Purpose**: Override a recommendation decision. Mandatory human justification is enforced.
+- **Required Inputs**: `recommendation_id` (string), `override_reason` (string).
+- **Response Structure**: JSON with `status: "OVERRIDDEN"`, `override_reason`, and `timestamp`.
+- **Status/Errors**: `200 OK`. `400 Bad Request` if `override_reason` is empty or missing. `404 Not Found` if ID does not exist.
+- **Example Request**: `{"recommendation_id": "REC00001", "override_reason": "Local branch priority constraint"}`
 
 ---
 
@@ -359,13 +406,20 @@ Command: `python -m pytest tests/ -q`
 
 The test suite consists of **68 automated tests** spanning all system modules:
 
-```bash
-$ python -m pytest tests/ -q
-....................................................................     [100%]
-============================== warnings summary ===============================
-..\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
-68 passed, 1 warning in 13.40s
-```
+### Unit Testing Strategy & Edge Cases
+The test suite ensures deterministic behavior across critical domain boundaries:
+- **Inventory & Safety Stock**: Validates that donor surplus calculation correctly subtracts `Forecast_Demand + Safety_Stock`. Verifies exact boundary values (donor at safety stock, below, and above).
+- **Recommendation Engine**: Tests full and partial network transfers, purchase fallbacks, and competing urgency priorities.
+- **Route Feasibility**: Validates routes against time/urgency constraints (e.g. Critical 24h deadline), capacity limits, and disabled routes.
+- **API & Governance**: Evaluates HTTP status codes, workflow states (`PENDING`, `APPROVED`, `OVERRIDDEN`), and database persistence.
+- **Disruption Simulation**: Verifies correct mathematical scaling for demand surges, capacity reductions, and transit delays without mutating global states.
+
+### Error Boundaries and Error Handling
+The system enforces strict error boundaries to prevent silent failures and ensure observability:
+- **Data Input Boundary**: Missing datasets or invalid metrics (e.g., negative capacities) raise explicit `ValueError` or `FileNotFoundError` during validation (`src/data/validator.py`), halting the pipeline before processing.
+- **Recommendation Engine Boundary**: Infeasible routing (e.g., transit time > deadline, disabled route) gracefully skips the donor without throwing exceptions, routing the remaining shortage to purchase fallback.
+- **API Boundary**: Built on FastAPI, endpoint failures (e.g., missing override reason, invalid scenarios) return well-formed JSON responses with appropriate HTTP codes (`400 Bad Request`, `404 Not Found`). Internal stack traces are suppressed from the client, returning `500 Internal Server Error` with a safe generic message.
+- **Database Boundary**: SQLite operations are atomic. Non-existent IDs trigger `404`, and missing override reasons fail fast before any DB write.
 
 ### Test Breakdown by Module
 - `tests/test_api.py`: **24 passed** (FastAPI endpoints, HTTP codes, approval/rejection/override workflows, audit persistence)
