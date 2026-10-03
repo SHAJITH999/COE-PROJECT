@@ -26,6 +26,7 @@ class DonorPoolState:
             p = str(row["Product_ID"])
             key = (d, b, p)
             # Usable surplus protects Forecast_Demand + Safety_Stock
+            # This ensures that transferring stock does not cause a secondary stockout at the donor branch.
             surplus = float(row.get("Surplus_Units", 0))
             self.surplus_map[key] = max(0.0, surplus)
             dp_key = (d, p)
@@ -83,6 +84,7 @@ def find_and_rank_donors(
     for source_branch in candidate_branches:
         avail_surplus = donor_pool_state.get_available_surplus(date, source_branch, product_id)
         
+        # Skip donor if their available surplus is exhausted or would breach safety stock limits
         if avail_surplus <= 0:
             continue
             

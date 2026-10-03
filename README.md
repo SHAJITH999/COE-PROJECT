@@ -198,7 +198,7 @@ COE PROJECT/
     ├── test_inventory.py           # Inventory position & shortages (8 tests)
     ├── test_recommender.py         # Allocation & constraint rules (11 tests)
     ├── test_simulation.py          # Disruption scenarios & fairness (5 tests)
-    └── test_validation.py          # Validation pipeline checks (5 tests)
+    └── test_validation.py          # Metrics and limit validation (5 tests)
 ```
 
 ---

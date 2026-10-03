@@ -10,6 +10,11 @@ http://localhost:8000
 uvicorn src.api.app:app --reload --port 8000
 ```
 
+## OpenAPI Documentation
+FastAPI automatically generates interactive API documentation. Once the API is running, you can access it at:
+- **Swagger UI:** `http://localhost:8000/docs`
+- **OpenAPI JSON:** `http://localhost:8000/openapi.json`
+
 ## Endpoints
 
 ### `GET /health`

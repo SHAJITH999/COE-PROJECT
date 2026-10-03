@@ -70,10 +70,12 @@ def is_route_feasible(
         return False, "Route does not exist between source and destination"
         
     status = str(route_info.get("Route_Status", "Available")).strip().lower()
+    # Route is rejected if unavailable or closed by logistics
     if status in ["unavailable", "disabled", "closed"]:
         return False, f"Route status is '{route_info.get('Route_Status')}'"
         
     capacity = float(route_info.get("Vehicle_Capacity", 0))
+    # Route is rejected if it lacks vehicle capacity
     if capacity <= 0:
         return False, "Vehicle capacity is zero or negative"
         
@@ -83,6 +85,8 @@ def is_route_feasible(
         
     if service_urgency in MAX_TRANSFER_TIME_HOURS:
         max_allowed = MAX_TRANSFER_TIME_HOURS[service_urgency]
+        # Max allowed transfer time is dictated by the destination's Service Urgency 
+        # to ensure stock arrives before critical SLA deadlines.
         if transfer_time > max_allowed:
             return False, f"Transfer time {transfer_time}h exceeds urgency limit {max_allowed}h"
             

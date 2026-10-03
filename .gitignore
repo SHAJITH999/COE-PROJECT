@@ -52,4 +52,6 @@ Desktop.ini
 *.sqlite3
 outputs/*.db
 outputs/*.sqlite
+outputs/*.csv
+data/processed/*.csv
 test_*.db
